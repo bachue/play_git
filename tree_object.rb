@@ -10,10 +10,11 @@ class GitObject
       object = new
 
       type, size_str = '', ''
-      consumed = data.each_byte.each_with_index { |c, i| if c == 0x20 then break i else type << c.chr end }
+      consumed = data.index ' '
+      type = data[0..consumed]
       consumed += 1
       object.type = type
-      consumed += data[consumed..-1].each_byte.each_with_index { |c, i| if c.zero? then break i else size_str << c.chr end }
+      consumed += data[consumed..-1].index "\x00"
       consumed += 1
       object.size = size_str.to_i
 

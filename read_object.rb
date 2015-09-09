@@ -1,4 +1,5 @@
-require_relative 'object'
+require_relative 'git_object'
+require_relative 'git_commit'
 
 def usage
   STDERR.puts <<-HELP
@@ -19,3 +20,5 @@ size: #{object.size}
 OUTPUT
 
 print object.data
+
+p GitCommit.new object

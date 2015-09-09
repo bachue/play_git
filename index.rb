@@ -38,7 +38,7 @@ class Index
 
         if len == CE_NAMEMASK
           name_beg, name_end = iter_end, iter_end
-          name_end += 1 until content[name_end].unpack('c')[0] == 0
+          name_end += 1 until content[name_end] == "\x00"
           index.name = content[name_beg...name_end]
           len = index.name.size
         else
