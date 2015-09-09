@@ -24,7 +24,7 @@ class GitCommit
       offset += 1
     end
 
-    if object.data[offset..-1] =~ /\A(author\s+([^<]+)<([^>]+)>\s+(\d+)\s+([+-]\d+))$/
+    if object.data[offset..-1] =~ /\A(author\s+([^<]+)\s+<([^>]+)>\s+(\d+)\s+([+-]\d+))$/
       line = $1
       offset += line.size + 1
       name, email, timestamp, timezone = $2, $3, $4, $5
@@ -33,7 +33,7 @@ class GitCommit
       @author_time = DateTime.new(time.year, time.month, time.day, time.hour, time.min, time.sec, timezone).to_time
     end
 
-    if object.data[offset..-1] =~ /\A(committer\s+([^<]+)<([^>]+)>\s+(\d+)\s+([+-]\d+))$/
+    if object.data[offset..-1] =~ /\A(committer\s+([^<]+)\s+<([^>]+)>\s+(\d+)\s+([+-]\d+))$/
       line = $1
       offset += line.size + 1
       name, email, timestamp, timezone = $2, $3, $4, $5
