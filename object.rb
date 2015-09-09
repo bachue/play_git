@@ -9,15 +9,15 @@ class GitObject
       data = inflater.inflate file.read 8192
       object = new
 
-      type, size_str = nil, nil
-      consumed = data.each_byte.each_with_index { |c, i| c == 0x20 ? break i : type << c.chr }
+      type, size_str = '', ''
+      consumed = data.each_byte.each_with_index { |c, i| if c == 0x20 then break i else type << c.chr end }
       consumed += 1
       object.type = type
-      data[consumed..-1].each_byte.each_with_index { |c, i| c == 0 ? break i : size_str << c.chr }
+      data[consumed..-1].each_byte.each_with_index { |c, i| if c.zero? then break i else size_str << c.chr end }
       consumed += 1
       object.size = size_str.to_i
 
-      if data.size - consumed >= size
+      if data.size - consumed >= object.size
         object.data = data[consumed..-1]
       else
         object.data = data[consumed..-1] + inflater.inflate(file.read)

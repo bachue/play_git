@@ -16,5 +16,6 @@ object = GitObject.read_from ARGV[0]
 puts <<-OUTPUT
 type: #{object.type}
 size: #{object.size}
-data: #{object.data}
 OUTPUT
+
+print object.data
