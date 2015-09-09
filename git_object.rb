@@ -11,7 +11,7 @@ class GitObject
 
       type, size_str = '', ''
       consumed = data.index ' '
-      type = data[0..consumed]
+      type = data[0...consumed]
       consumed += 1
       object.type = type
       consumed += data[consumed..-1].index "\x00"
