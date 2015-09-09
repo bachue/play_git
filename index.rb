@@ -72,13 +72,13 @@ class Index
     @mode      = content[24...28].be32.to_s 8
     @uid       = content[28...32].be32
     @gid       = content[32...36].be32
-    @sz        = content[36...40].be32
+    @size      = content[36...40].be32
     @sha1      = content[40...60]
     @flags     = content[60...62].be16
   end
 
   def sha1_hex
-    @sha1,unpack('H*')[0]
+    @sha1.unpack('H*')[0]
   end
 
   def set_extended_flags content
