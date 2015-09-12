@@ -5,9 +5,7 @@ require 'time'
 
 class Index
   def self.verify_header content
-    hdr_signature = content[0...4].ntohl
-    hdr_version   = content[4...8].ntohl
-    hdr_entries   = content[8...12].ntohl
+    hdr_signature, hdr_version, hdr_entries = content[0...12].unpack 'NNN'
 
     abort 'hdr_signature is invalid' unless hdr_signature == 0x44495243
     abort 'hdr_version   is invalid' unless (2..4).include?(hdr_version)
@@ -59,22 +57,14 @@ class Index
 
   attr_accessor :ctime, :mtime, :dev, :inode, :mode, :uid, :gid, :size, :sha1, :flags, :name
   def initialize content
-    ctime_sec  = content[0...4].be32
-    ctime_nsec = content[4...8].be32
+    ctime_sec, ctime_nsec, mtime_sec, mtime_nsec,
+    @dev, @inode, mode, @uid, @gid, @size = content[0...40].unpack 'N*'
+
     @ctime     = Time.at ctime_sec, ctime_nsec.to_f / 1000
-
-    mtime_sec  = content[8...12].be32
-    mtime_nsec = content[12...16].be32
     @mtime     = Time.at mtime_sec, mtime_nsec.to_f / 1000
-
-    @dev       = content[16...20].be32
-    @inode     = content[20...24].be32
-    @mode      = content[24...28].be32.to_s 8
-    @uid       = content[28...32].be32
-    @gid       = content[32...36].be32
-    @size      = content[36...40].be32
+    @mode      = mode.to_s 8
     @sha1      = content[40...60]
-    @flags     = content[60...62].be16
+    @flags     = content[60...62].unpack('n')[0]
   end
 
   def sha1_hex

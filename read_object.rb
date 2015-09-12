@@ -20,5 +20,3 @@ size: #{object.size}
 OUTPUT
 
 print object.data
-
-p GitCommit.new object
