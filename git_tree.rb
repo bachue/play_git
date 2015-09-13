@@ -11,7 +11,7 @@ class GitTree
 
   def initialize object
     abort 'not a git tree object' unless object.type == 'tree'
-    data, entries = object.data, []
+    data, @entries = object.data, []
 
     until data.empty?
       entry = Entry.new
@@ -27,7 +27,7 @@ class GitTree
       sha1 = data[(space + 1)...(space + 20 + 1)]
       entry.sha1 = sha1
 
-      entries << entry
+      @entries << entry
       data = data[(space + 20 + 1)..-1]
     end
   end

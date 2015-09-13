@@ -1,5 +1,6 @@
 require_relative 'git_object'
 require_relative 'git_commit'
+require_relative 'git_tree'
 
 def usage
   STDERR.puts <<-HELP
