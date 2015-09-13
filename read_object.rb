@@ -1,6 +1,7 @@
 require_relative 'git_object'
 require_relative 'git_commit'
 require_relative 'git_tree'
+require_relative 'git_tag'
 
 def usage
   STDERR.puts <<-HELP
@@ -25,6 +26,8 @@ when 'tree'
   p GitTree.new(object)
 when 'commit'
   p GitCommit.new(object)
+when 'tag'
+  p GitTag.new(object)
 else
   print object.data
 end
