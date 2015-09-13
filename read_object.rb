@@ -28,6 +28,8 @@ when 'commit'
   p GitCommit.new(object)
 when 'tag'
   p GitTag.new(object)
-else
+when 'blob'
   print object.data
+else
+  abort 'invalid object type'
 end
