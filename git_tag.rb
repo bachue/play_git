@@ -3,7 +3,7 @@ class GitTag
 
   def initialize object
     abort 'not a git tag object' unless object.type == 'tag'
-    abort 'invalid git tag' if object.size < 64
+    abort 'invalid git tag' if object.data.size < 64
     abort 'invalid git tag' unless object.data[0...7] == 'object ' &&
                                    object.data[47] == "\n" &&
                                    object.data[48...53] == 'type '
