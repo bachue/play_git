@@ -3,7 +3,11 @@ class GitTree
     attr_accessor :mode_str, :filename, :sha1
 
     def mode
-      mode_str.to_i 8
+      @mode_str.to_i 8
+    end
+
+    def sha1_hex
+      @sha1.unpack('H*')[0]
     end
   end
 
