@@ -19,4 +19,11 @@ type: #{object.type}
 size: #{object.size}
 OUTPUT
 
-print object.data
+case object.type
+when 'tree'
+  p GitTree.new(object)
+when 'commit'
+  p GitCommit.new(object)
+else
+  print object.data
+end
