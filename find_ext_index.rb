@@ -28,7 +28,8 @@ puts  'Succeed to validate the checksum'
 puts '-------------------------'
 
 Index.each_index file_content, size do |index|
-  puts <<-EOF
+  if index & CE_EXTENDED_FLAGS
+    puts <<-EOF
 name:  #{index.name}
 ctime: #{index.ctime}
 mtime: #{index.mtime}
@@ -38,8 +39,8 @@ mode:  #{index.mode}
 uid:   #{index.uid}
 gid:   #{index.gid}
 size:  #{index.size}
-flags: #{index.read_flags}
 sha1:  #{index.sha1_hex}
 -------------------------
-  EOF
+    EOF
+  end
 end

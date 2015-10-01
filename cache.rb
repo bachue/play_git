@@ -21,3 +21,15 @@ CE_INTENT_TO_ADD     = 1 << 29
 CE_SKIP_WORKTREE     = 1 << 30
 CE_EXTENDED2         = 1 << 31
 CE_EXTENDED_FLAGS    = CE_INTENT_TO_ADD | CE_SKIP_WORKTREE
+
+module CEFlags
+  def self.explain flags
+    result = []
+    result << 'CE_STAGEMASK'     unless (flags & CE_STAGEMASK).zero?
+    result << 'CE_EXTENDED'      unless (flags & CE_EXTENDED).zero?
+    result << 'CE_VALID'         unless (flags & CE_VALID).zero?
+    result << 'CE_INTENT_TO_ADD' unless (flags & CE_INTENT_TO_ADD).zero?
+    result << 'CE_SKIP_WORKTREE' unless (flags & CE_SKIP_WORKTREE).zero?
+    result.join ' | '
+  end
+end

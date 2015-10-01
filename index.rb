@@ -71,6 +71,10 @@ class Index
     @sha1.unpack('H*')[0]
   end
 
+  def read_flags
+    CEFlags.explain @flags
+  end
+
   def set_extended_flags content
     extended_flags = content.be16 << 16
     if extended_flags & ~CE_EXTENDED_FLAGS != 0
