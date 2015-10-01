@@ -9,14 +9,14 @@ class GitObject
       data = inflater.inflate file.read 8192
       object = new
 
-      type, size_str = '', ''
       consumed = data.index ' '
       type = data[0...consumed]
       consumed += 1
       object.type = type
+      size_beg = consumed
       consumed += data[consumed..-1].index "\x00"
+      object.size = data[size_beg...consumed].to_i
       consumed += 1
-      object.size = size_str.to_i
 
       if data.size - consumed >= object.size
         object.data = data[consumed..-1]
