@@ -13,21 +13,20 @@ unless ARGV[0]
 end
 
 file = File.open ARGV[0], 'rb'
-size = file.stat.size.freeze
-file_content = file.read.freeze
+index = Index.new file.read.freeze
 file.close
 
-hdr_signature, hdr_version, hdr_entries = Index.verify_header file_content
+index.verify_header
 
-puts "Signature: #{hdr_signature}"
-puts "Version:   #{hdr_version}"
-puts "Entries:   #{hdr_entries}"
+puts "Signature: #{index.hdr_signature}"
+puts "Version:   #{index.hdr_version}"
+puts "Entries:   #{index.hdr_entries}"
 
-Index.verify_index file_content
+index.verify_index
 puts  'Succeed to validate the checksum'
 puts '-------------------------'
 
-Index.each_index file_content, size do |index|
+index.each_index do |index|
   puts <<-EOF
 name:  #{index.name}
 ctime: #{index.ctime}
