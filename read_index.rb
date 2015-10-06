@@ -42,3 +42,8 @@ sha1:  #{index.sha1_hex}
 -------------------------
   EOF
 end
+
+if index.extension_existed?
+  index.read_extension
+  p index.extensions
+end

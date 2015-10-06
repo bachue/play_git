@@ -2,9 +2,10 @@ require_relative 'binary'
 require_relative 'cache'
 require 'digest/sha1'
 require 'time'
+require 'set'
 
 class Index
-  attr_reader :hdr_signature, :hdr_version, :hdr_entries
+  attr_reader :hdr_signature, :hdr_version, :hdr_entries, :extensions
   def initialize content
     @content = content
     @hdr_signature, @hdr_version, @hdr_entries = content[0...12].unpack 'NNN'
@@ -48,15 +49,77 @@ class Index
         enum << index
         iter_beg += (iter_end - iter_beg + len + 8) & ~7
       end
+
+      @ext_content = @content[iter_beg...-20] if iter_beg <= @content.size - 8 - 20
     end
 
-    @extension = @content[iter_beg...-20]
 
     if block_given?
       enumerator.each &block
     else
       enumerator
     end
+  end
+
+  def extension_existed?
+    !!@ext_content
+  end
+
+  def read_extension
+    iter_beg = 0
+    @extensions = []
+    while iter_beg <= @ext_content.size - 8
+      ext_sig, ext_size = @ext_content[iter_beg...(iter_beg + 4)], @ext_content[(iter_beg + 4)...(iter_beg + 8)]
+      ext_size = ext_size.unpack('N')[0]
+      ext = { sig: ext_sig, size: ext_size }
+      content = @ext_content[(iter_beg + 8)..(iter_beg + 8 + ext_size)]
+      case ext_sig
+      when 'TREE'
+        ext.update cache_tree: read_cache_tree(content)
+      when 'REUC'
+        puts 'REUC'
+      when 'link'
+        puts 'link'
+      else
+        if ('A'..'Z').include?(ext_sig[0])
+          STDERR.puts "Ignoring #{ext_sig} extension"
+        else
+          abort "Index uses #{ext_sig} extension, which we do not understand"
+        end
+      end
+      @extensions << ext
+      iter_beg += 8 + ext_size
+    end
+  end
+
+private
+
+  def read_cache_tree content
+    cache_tree, _ = read_sub_cache_tree '', content
+    cache_tree
+  end
+
+  def read_sub_cache_tree name, content
+    iter_end = content.index "\x00"
+    iter_beg = iter_end + 1
+    iter_end = content.index ' '
+    entry_point = content[iter_beg...iter_end].to_i
+    iter_beg = iter_end + 1
+    iter_end = content.index "\n"
+    subtree_nr = content[iter_beg...iter_end].to_i
+    iter_beg = iter_end + 1
+    sha1 = content[iter_beg...(iter_beg + 20)]
+    cache_tree = CacheTree.new name, entry_point, subtree_nr, sha1
+    content = content[(iter_beg + 20)..-1]
+
+    subtree_nr.times do
+      iter_end = content.index "\x00"
+      name = content[0...iter_end]
+      child, content = read_sub_cache_tree name, content
+      cache_tree.add_children child
+    end
+
+    return cache_tree, content
   end
 
   class Entry
@@ -86,6 +149,23 @@ class Index
         abort 'Unknown index entry format %08x' % extended_flags
       end
       @flags |= extended_flags
+    end
+  end
+
+  class CacheTree
+    attr_accessor :entry_point, :subtree_nr, :sha1, :name
+
+    def initialize name, entry_point, subtree_nr, sha1
+      @name, @entry_point, @subtree_nr, @sha1 = name, entry_point, subtree_nr, sha1
+    end
+
+    def sha1_hex
+      @sha1.unpack('H*')[0]
+    end
+
+    def add_children child
+      @children ||= Set.new
+      @children << child
     end
   end
 end
