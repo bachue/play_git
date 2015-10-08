@@ -77,7 +77,7 @@ class Index
       when 'TREE'
         ext.update cache_tree: read_cache_tree(content)
       when 'REUC'
-        puts 'REUC'
+        ext.update resolve_undo: read_resolve_undo(content)
       when 'link'
         puts 'link'
       else
@@ -120,6 +120,36 @@ private
     end
 
     return cache_tree, content
+  end
+
+  def read_resolve_undo content
+    resolve_undo = []
+
+    until content.empty?
+      iter_beg = 0
+      iter_end = content.index "\x00"
+      name = content[iter_beg...iter_end]
+      content = content[(iter_end + 1)..-1]
+
+      ui = [{}, {}, {}]
+
+      3.times do |i|
+        iter_end = content.index "\x00"
+        ui[i].update mode: content[0...iter_end]
+        content = content[(iter_end + 1)..-1]
+      end
+      iter_beg = 0
+
+      3.times do |i|
+        ui[i].update sha1: content[iter_beg...(iter_beg + 20)]
+        iter_beg += 20
+      end
+
+      content = content[iter_beg..-1]
+      resolve_undo << ResolveUndo.new(name, ui)
+    end
+
+    resolve_undo
   end
 
   class Entry
@@ -166,6 +196,29 @@ private
     def add_children child
       @children ||= Set.new
       @children << child
+    end
+  end
+
+  class ResolveUndo
+    attr_accessor :name, :ours, :theirs, :base
+
+    class Entry
+      attr_accessor :mode, :sha1
+
+      def initialize mode, sha1
+        @mode, @sha1 = mode, sha1
+      end
+
+      def sha1_hex
+        @sha1.unpack('H*')[0]
+      end
+    end
+
+    def initialize name, util
+      @name   = name
+      @base   = Entry.new util[0][:mode], util[0][:sha1]
+      @ours   = Entry.new util[1][:mode], util[1][:sha1]
+      @theirs = Entry.new util[2][:mode], util[2][:sha1]
     end
   end
 end
