@@ -52,8 +52,18 @@ class PackedIndex
         iter_beg += 4
       end
       nr.times do |i|
-        @entries[i].update offset: @idx_content[iter_beg...(iter_beg + 4)]
+        @entries[i].update offset: @idx_content[iter_beg...(iter_beg + 4)].unpack('N')[0]
         iter_beg += 4
+      end
+      nr.times do |i|
+        offset = @entries[i][:offset]
+        if offset & 0x80000000 != 0
+          diff = iter_beg + (offset & 0x7fffffff) * 8
+          offset = @idx_content[diff...(diff + 4)].unpack('N')[0]
+          offset <<= 32
+          offset |= @idx_content[(diff + 4)...(diff + 8)].unpack('N')[0]
+          @entries[i][:offset] = offset
+        end
       end
     end
     @num_objects = nr
@@ -67,7 +77,7 @@ class PackedIndex
       mi = (hi + lo) / 2
       case sha1 <=> @entries[mi][:sha1]
       when 0
-        return mi
+        return @entries[mi]
       when -1
         hi = mi
       when 1
