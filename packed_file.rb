@@ -19,17 +19,16 @@ class PackedFile
     File.open @filename, 'rb' do |file|
       file.seek offset
       c = file.read(1).unpack('C')[0]
-      type = get_object_type((c >> 4) & 7)
+      type = (c >> 4) & 7
       size = c & 15
       shift = 4
-      while c & 80 != 0
+      while c & 0x80 != 0
         c = file.read(1).unpack('C')[0]
         size += (c & 0x7f) << shift
         shift += 7
       end
       zlib = Zlib::Inflate.new
       content = zlib.inflate file.read size
-      zlib.finish
       zlib.close
       return type, size, content
     end
