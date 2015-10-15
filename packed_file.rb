@@ -27,14 +27,42 @@ class PackedFile
         size += (c & 0x7f) << shift
         shift += 7
       end
+      read_delta type, file, offset
       zlib = Zlib::Inflate.new
       content = zlib.inflate file.read size
       zlib.close
-      return type, size, content
+      return type, size, content, @base_offset, @base_sha1
     end
   end
 
 private
+
+  def read_delta type, file, offset
+    case type
+    when OBJ_OFS_DELTA
+      read_ofs_delta file, offset
+    when OBJ_REF_DELTA
+      read_ref_delta file
+    end
+  end
+
+  def read_ofs_delta file, delta_obj_offset
+    c = file.read(1).unpack('C')[0]
+    base_offset = c & 127
+    while c & 128 != 0
+      base_offset += 1
+      c = file.read(1).unpack('C')[0]
+      base_offset = (base_offset << 7) + (c & 127)
+    end
+    @base_offset = delta_obj_offset - base_offset
+    if @base_offset <= 0 || @base_offset >= delta_obj_offset
+      abort 'out of bound'
+    end
+  end
+
+  def read_ref_delta file
+    @base_sha1 = file.read 20
+  end
 
   def get_object_type num
     {
