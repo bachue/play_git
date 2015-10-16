@@ -17,8 +17,7 @@ index = File.open(index_file, 'rb').read
 packed_index = PackedIndex.new index_file, index
 packed_index.read_index
 
-entry = packed_index.search sha1
-offset = entry[:offset]
+offset = packed_index.search sha1
 
 packed_file = PackedFile.new pack_file
 p packed_file.read_object offset

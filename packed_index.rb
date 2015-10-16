@@ -77,7 +77,7 @@ class PackedIndex
       mi = (hi + lo) / 2
       case sha1 <=> @entries[mi][:sha1]
       when 0
-        return @entries[mi]
+        return @entries[mi][:offset]
       when -1
         hi = mi
       when 1

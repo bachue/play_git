@@ -23,6 +23,7 @@ class GitObject
       else
         object.data = data[consumed..-1] + inflater.inflate(file.read)
       end
+      inflater.close
       object
     end
   end
