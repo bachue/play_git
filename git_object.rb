@@ -4,9 +4,9 @@ class GitObject
   attr_accessor :data, :type, :size
 
   def self.read_from file
-    File.open ARGV[0], 'rb' do |file|
+    File.open file, 'rb' do |f|
       inflater = Zlib::Inflate.new
-      data = inflater.inflate file.read 8192
+      data = inflater.inflate f.read 8192
       object = new
 
       consumed = data.index ' '
@@ -21,7 +21,7 @@ class GitObject
       if data.size - consumed >= object.size
         object.data = data[consumed..-1]
       else
-        object.data = data[consumed..-1] + inflater.inflate(file.read)
+        object.data = data[consumed..-1] + inflater.inflate(f.read)
       end
       inflater.close
       object

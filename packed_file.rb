@@ -1,5 +1,6 @@
 require 'zlib'
 require_relative 'git_repo'
+require_relative 'git_object'
 
 class PackedFile
   OBJ_BAD = -1
@@ -11,8 +12,8 @@ class PackedFile
   OBJ_OFS_DELTA = 6
   OBJ_REF_DELTA = 7
 
-  class Object
-    attr_accessor :type, :size, :data, :base_offset, :base_sha1
+  class Object < GitObject
+    attr_accessor :base_offset, :base_sha1
 
     def initialize type, size, data
       @type, @size, @data = get_object_type(type), size, data
